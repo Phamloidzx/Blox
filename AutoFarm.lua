@@ -1,28 +1,43 @@
-repeat wait() until game:IsLoaded()
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
 
-local player = game.Players.LocalPlayer
-local rs = game:GetService("ReplicatedStorage")
-local vu = game:GetService("VirtualUser")
+print("🔄 Đang tải Loader... Vui lòng chờ!")
 
--- Chống AFK
-player.Idled:Connect(function()
-    vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
-    wait(1)
-    vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+-- Giao diện thông báo tải script
+local ScreenGui = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local TextLabel = Instance.new("TextLabel")
+
+ScreenGui.Parent = game:GetService("CoreGui")
+
+Frame.Parent = ScreenGui
+Frame.Size = UDim2.new(0, 300, 0, 100)
+Frame.Position = UDim2.new(0.5, -150, 0.3, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 2
+Frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+
+TextLabel.Parent = Frame
+TextLabel.Size = UDim2.new(1, 0, 1, 0)
+TextLabel.BackgroundTransparency = 1
+TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextLabel.Font = Enum.Font.SourceSansBold
+TextLabel.TextSize = 18
+TextLabel.Text = "⏳ Đang tải script... Vui lòng chờ..."
+TextLabel.TextWrapped = true
+
+wait(2) -- Chờ 2 giây trước khi tải script chính
+
+-- Tải script chính từ GitHub
+local success, err = pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Phamloidzx/Blox/refs/heads/main/AutoFarm.lua"))()
 end)
 
--- Auto Farm
-while wait(0.1) do
-    local target = nil
-    for _, mob in pairs(workspace.Enemies:GetChildren()) do
-        if mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-            target = mob
-            break
-        end
-    end
-
-    if target then
-        player.Character.HumanoidRootPart.CFrame = target.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)
-        rs.Remotes.CommF_:InvokeServer("AttackButton")
-    end
+if success then
+    TextLabel.Text = "✅ Tải thành công! Đang chạy script..."
+    wait(1)
+    ScreenGui:Destroy()
+else
+    TextLabel.Text = "❌ Lỗi tải script: " .. tostring(err)
 end
